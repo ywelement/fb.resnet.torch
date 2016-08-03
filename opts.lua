@@ -16,7 +16,7 @@ function M.parse(arg)
    cmd:text()
    cmd:text('Options:')
     ------------ General options --------------------
-   cmd:option('-data',       '',         'Path to dataset')
+   cmd:option('-data',       '/home/yang/github/fb.resnet.torch/gen/data_ImageNet',         'Path to dataset')
    cmd:option('-dataset',    'imagenet', 'Options: imagenet | cifar10')
    cmd:option('-manualSeed', 0,          'Manually set RNG seed')
    cmd:option('-nGPU',       1,          'Number of GPUs to use by default')
@@ -40,13 +40,12 @@ function M.parse(arg)
    cmd:option('-weightDecay',     1e-4,  'weight decay')
    ---------- Model options ----------------------------------
    cmd:option('-netType',      'resnet', 'Options: resnet | preresnet')
-   cmd:option('-depth',        34,       'ResNet depth: 18 | 34 | 50 | 101 | ...', 'number')
+   cmd:option('-depth',        18,       'ResNet depth: 18 | 34 | 50 | 101 | ...', 'number')
    cmd:option('-shortcutType', '',       'Options: A | B | C')
-   cmd:option('-retrain',      'none',   'Path to model to retrain with')
+   cmd:option('-retrain',      '/home/yang/data2/resnet/trained_model/resnet-18.t7',   'Path to model to retrain with')
    cmd:option('-optimState',   'none',   'Path to an optimState to reload from')
    ---------- Model options ----------------------------------
    cmd:option('-shareGradInput',  'false', 'Share gradInput tensors to reduce memory usage')
-   cmd:option('-optnet',          'false', 'Use optnet to reduce memory usage')
    cmd:option('-resetClassifier', 'false', 'Reset the fully connected layer for fine-tuning')
    cmd:option('-nClasses',         0,      'Number of classes in the dataset')
    cmd:text()
@@ -56,7 +55,6 @@ function M.parse(arg)
    opt.testOnly = opt.testOnly ~= 'false'
    opt.tenCrop = opt.tenCrop ~= 'false'
    opt.shareGradInput = opt.shareGradInput ~= 'false'
-   opt.optnet = opt.optnet ~= 'false'
    opt.resetClassifier = opt.resetClassifier ~= 'false'
 
    if not paths.dirp(opt.save) and not paths.mkdir(opt.save) then
@@ -86,10 +84,6 @@ function M.parse(arg)
       if opt.nClasses == 0 then
          cmd:error('-nClasses required when resetClassifier is set')
       end
-   end
-
-   if opt.shareGradInput and opt.optnet then
-      cmd:error('error: cannot use both -shareGradInput and -optnet')
    end
 
    return opt
