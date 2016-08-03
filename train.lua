@@ -99,7 +99,6 @@ function Trainer:test(epoch, dataloader)
 
       -- Copy input and target to the GPU
       self:copyInputs(sample)
-
       local output = self.model:forward(self.input):float()
       local batchSize = output:size(1) / nCrops
       local loss = self.criterion:forward(self.model.output, self.target)
@@ -111,6 +110,17 @@ function Trainer:test(epoch, dataloader)
 
       print((' | Test: [%d][%d/%d]    Time %.3f  Data %.3f  top1 %7.3f (%7.3f)  top5 %7.3f (%7.3f)'):format(
          epoch, n, size, timer:time().real, dataTime, top1, top1Sum / N, top5, top5Sum / N))
+--[[
+     if n==5 then
+        --print(self.model)
+        print(#self.input)
+        torch.save('/media/eos/private/debug/resnet/dbg-fb-'..n..'-output.t7', {input=self.input:clone():float(), target=sample.target:clone():float(), output=output:clone():float()})
+        for ii=1, self.input:size(1) do
+           image.save('/media/eos/private/debug/resnet/dbg-fb-'..n..'-'..ii..'.png', self.input[ii]:clone():float())
+           torch.save('/media/eos/private/debug/resnet/dbg-fb-'..n..'-'..ii..'.t7', {input=self.input[ii]:clone():float(), target=sample.target[ii], output=output[ii], top1=top1, top5=top5, top1Sum=top1Sum, top5Sum=top5Sum})
+        end
+     end
+--]]
 
       timer:reset()
       dataTimer:reset()
@@ -140,7 +150,7 @@ function Trainer:computeScore(output, target, nCrops)
    local correct = predictions:eq(
       target:long():view(batchSize, 1):expandAs(output))
 
-   -- Top-1 score
+   -- Top-1 score (error)
    local top1 = 1.0 - (correct:narrow(2, 1, 1):sum() / batchSize)
 
    -- Top-5 score, if there are at least 5 classes
